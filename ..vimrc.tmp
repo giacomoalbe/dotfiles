@@ -265,11 +265,7 @@ augroup END
 " Vundle Plugins {{{
 
 " initiate Vundle
-set rtp+=~/.vim/bundle/vundle/
-call vundle#rc()
-
-Plugin 'gmarik/vundle'
-"let &runtimepath.=',$HOME/.vim/bundle/Vundle.vim'
+let &runtimepath.=',$HOME/.vim/bundle/Vundle.vim'
 call vundle#begin() " let Vundle manage Vundle, required Plugin 'gmarik/Vundle.vim' 
 
 " Plugin's List
