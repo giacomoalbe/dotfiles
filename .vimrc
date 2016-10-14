@@ -2,7 +2,7 @@
 " Colors {{{"{{{
 
 " set the color theme to wombat256
-colorscheme wombat
+colorscheme wombat256mod
 " make a mark for column 80
 set colorcolumn=80
 " and set the mark color to DarkSlateGray
@@ -15,10 +15,13 @@ syntax on
 hi CursorLine cterm=NONE ctermbg=234 
 set cursorline
 " set Adobe's Source Code Pro font as default
-set guifont=Source\ Code\ Pro
+"set guifont=Source\ Code\ Pro
 
 " }}}"}}}
 " General {{{
+if has('gui_running')
+    set guifont=Lucida_Console:h11
+endif
 
 " keep the cursor visible within 3 lines when scrolling
 set scrolloff=3
@@ -28,6 +31,9 @@ set wildmenu
 
 " Show matching parentesis
 set showmatch
+
+" Reload changed  files
+set autoread
 
 " remove the .ext~ files, but not the swapfiles
 set nobackup
@@ -87,6 +93,9 @@ set shiftwidth=4
 " }}}
 " Mappings {{{
 
+" Set foldmethod=syntax
+nnoremap fd :execute ':set foldmethod=syntax'<CR>
+
 " Cancella testo tra due virgole
 nnoremap ci, T,ct,
 
@@ -123,9 +132,16 @@ command! Ef :CtrlP
 nnoremap I i
 
 " Slash e Pipe remapped
-inoremap < \ 
-inoremap > \|
+"inoremap < \ 
+"inoremap > \|
 
+" Add Bakctick for Markdown
+inoremap '' `
+" Go To Previus/Next Location of pointer
+" Previus
+nnoremap <C-o> <C-o> 
+" Next
+nnoremap <C-p> <C-i> 
 
 " Disable arrow keys during insert mode
 
@@ -161,6 +177,9 @@ nnoremap - .
 " Make uppercase
 nnoremap mu <esc>viwUviw<esc>
 
+" Replace work with yanked one
+nnoremap riw viwp
+
 " New Operators
 " Select inside parenthesis
 onoremap p i(
@@ -175,18 +194,24 @@ nnoremap œ 10k
 nnoremap º 10j
 nnoremap ª b
 
+nnoremap <Esc>l 10l
+nnoremap <Esc>j 10h
+nnoremap <Esc>i 10k
+nnoremap <Esc>k 10j
+
 nnoremap ¬ e
 
 nnoremap el g$
 nnoremap ej g^
 
 " Mapping for ><
-inoremap \ <
-inoremap \| >
+
+"inoremap \ <
+"inoremap \| >
 
 " Mapping for |\
-inoremap < \
-inoremap > |
+"inoremap < \
+"inoremap > |
 
 " Crea una linea prima o dopo quella attuale senza uscire dal command mode
 nnoremap <S-ENTER> O<Esc>
@@ -194,6 +219,11 @@ nnoremap <CR> o<Esc>
 
 inoremap jk <esc>
 inoremap <esc> <nop>
+
+" }}}
+" Commands {{{
+
+com! FormatJSON %!python -m json.tool
 
 " }}}
 " Leader Mappings {{{
@@ -244,15 +274,21 @@ augroup END
 
 augroup javascript_fold
     autocmd!
-    au FileType javascript :execute 'echo "JS file"'
-    au FileType javascript :execute 'filetype indent off'
-    au FileType javascript :execute 'call JavaScriptFold()'
-    au BufNewFile,BufRead *.js :execute 'call JavaScriptFold()' 
+    au FileType javascript set foldmethod=syntax
+    au FileType javascript set shiftwidth=2 
+    au BufNewFile,BufRead *.js set shiftwidth=2 
+    au BufNewFile,BufRead *.js set foldmethod=syntax
 augroup END
 
 augroup css_fold
-        autocmd!
-        au BufEnter,BufRead *.css set foldmethod=marker
+    autocmd!
+    au BufEnter,BufRead *.css set foldmethod=marker
+augroup END
+
+augroup html_fold
+    autocmd!
+    au FileType javascript set foldmethod=syntax
+    au BufEnter,BufRead *.html set foldmethod=indent
 augroup END
 
 augroup filetype_vim
@@ -277,19 +313,22 @@ Plugin 'itchyny/lightline.vim'
 Plugin 'kien/ctrlp.vim'         
 Plugin 'mattn/emmet-vim'
 "Plugin 'othree/javascript-libraries-syntax.vim'
-"Plugin 'vim-scripts/JavaScript-Indent'
+Plugin 'vim-scripts/JavaScript-Indent'
 Plugin 'gcmt/taboo.vim'
 Plugin 'MarcWeber/vim-addon-mw-utils'
 Plugin 'tomtom/tlib_vim'
 Plugin 'garbas/vim-snipmate'
 Plugin 'Raimondi/delimitMate'
-Plugin 'Valloric/YouCompleteMe'
+"Plugin 'Valloric/YouCompleteMe'
 Plugin 'helino/vim-json'
 Plugin 'junegunn/vim-easy-align'
-Plugin 'marijnh/tern_for_vim'
+"Plugin 'marijnh/tern_for_vim'
 Plugin 'pangloss/vim-javascript'
 Plugin 'jelera/vim-javascript-syntax'
 Plugin 'nathanaelkane/vim-indent-guides'
+Plugin 'wesQ3/vim-windowswap'
+Plugin 'scrooloose/syntastic'
+Plugin 'maksimr/vim-jsbeautify'
 
 " end plugin definition
 call vundle#end()            " required for vundle
@@ -302,8 +341,8 @@ let g:user_emmet_leader_key='<C-z>'
 
 " LIGHTLINE
 let g:lightline = {
-    \ 'colorscheme' : 'wombat',
-    \ }
+            \ 'colorscheme' : 'wombat',
+            \ }
 set laststatus=2
 
 " JAVASCRIPT SYNTAX
@@ -319,8 +358,25 @@ let g:ycm_add_preview_to_completeopt=0
 let g:ycm_confirm_extra_conf=0
 set completeopt-=preview
 
+" TERN FOR VIM
+let g:term_map_keys=1
+let g:tern_show_argouments_hint='on_hold'
+
+" SYNTASTIC
+set statusline+=%#warningmsg#
+set statusline+=%{SyntasticStatuslineFlag()}
+set statusline+=%*
+
+" On by default, turn it off for html
+let g:syntastic_mode_map = { 'mode': 'active',
+    \ 'active_filetypes': [],
+    \ 'passive_filetypes': ['html'] }
+
+" Syntastic Checker Enables
+let g:syntastic_css_checkers = ['prettycss']
+let g:syntastic_js_checkers = ['jshint']
+
+" Better :sign interface symbols
+let g:syntastic_error_symbol = '✗'
+let g:syntastic_warning_symbol = '!'
 " }}}
-
-
-
-
