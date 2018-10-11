@@ -1,1 +1,6 @@
 .*.bkp
+
+plugged/
+bundle/
+YCM-Generator/
+session/

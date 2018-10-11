@@ -1,0 +1,8 @@
+let g:netrw_dirhistmax  =10
+let g:netrw_dirhist_cnt =6
+let g:netrw_dirhist_1='/home/giacomo/Documenti/Lavoro/Digital74/siac3/app'
+let g:netrw_dirhist_2='/home/giacomo/Documenti/Lavoro/Digital74/BPER/docker'
+let g:netrw_dirhist_3='/home/giacomo/Documenti/Lavoro/Digital74/vue/vuetest/src'
+let g:netrw_dirhist_4='/home/giacomo/Documenti/Lavoro/Digital74/BPER/client/config'
+let g:netrw_dirhist_5='/home/giacomo/Documenti/Lavoro/Digital74/BPER/server/database/migrations'
+let g:netrw_dirhist_6='/home/giacomo/Documenti/Lavoro/Digital74/Permasteelisa/permastee/client/src/app/components/questionnaire-list'

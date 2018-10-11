@@ -1,0 +1,92 @@
+" ------- NVIM CONFIGURATION FILE -------
+" Colors {{{"{{{
+
+" set the color theme to wombat256
+"colorscheme wombat256mod
+" make a mark for column 80
+"set colorcolumn=80
+" and set the mark color to DarkSlateGray
+"highlight ColorColumn ctermbg=lightgray guibg=lightgray
+" Set 256 colors in Vim
+"set t_Co=256
+" turn on syntax highlighting
+"syntax on
+" Highlight current line
+"hi CursorLine cterm=NONE ctermbg=234 
+"set cursorline
+" set Adobe's Source Code Pro font as default
+"set guifont=Source\ Code\ Pro
+
+" }}}"}}}
+" General {{{
+
+
+
+
+
+" don't make vim compatible with vi 
+set nocompatible
+
+set nocp
+
+
+" and show line numbers
+set relativenumber
+set number
+
+" by default, in insert mode backspace won't delete over line breaks, or 
+" automatically-inserted indentation, let's change that
+set backspace=indent,eol,start
+
+" dont't unload buffers when they are abandoned, instead stay in the
+" background
+"
+set hidden
+
+
+
+
+set autoindent
+set noexpandtab
+set tabstop=4
+set shiftwidth=4
+
+" }}}
+" Mappings {{{
+
+
+
+
+" Custom Commands
+command! Vsp :execute ':vsplit | CtrlP<CR>'
+command! Ef :CtrlP
+
+
+" Slash e Pipe remapped
+"inoremap < \ 
+"inoremap > \|
+
+
+
+
+
+
+
+
+
+
+" }}}
+" Leader Mappings {{{
+
+" Set the leader key
+
+" }}}
+" VimPlug {{{
+" }}}
+" VimPlug Configuration {{{
+
+
+" }}}
+" AutoCommands {{{
+" 	
+" }}}

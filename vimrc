@@ -23,6 +23,10 @@ if has('gui_running')
     set guifont=Lucida_Console:h11
 endif
 
+if &shell =~# 'fish$'
+    set shell=sh
+endif
+
 " keep the cursor visible within 3 lines when scrolling
 set scrolloff=3
 
@@ -52,12 +56,7 @@ let &clipboard = has('unnamedplus') ? 'unnamedplus' : 'unnamed'
 " don't make vim compatible with vi 
 set nocompatible
 set nocp
-" make vim try to detect file types and load plugins for them
-filetype on
-filetype plugin on
 filetype indent on
-" reload files changed outside vim
-set autoread         
 " encoding is utf 8
 set encoding=utf-8
 set fileencoding=utf-8
@@ -121,6 +120,13 @@ vmap <S-Tab> <gv
 nnoremap ' `
 nnoremap ` '
 
+" Vertical split with CtrlP
+nnoremap vv <C-w>v<cr>:CtrlP<cr>
+" Horizontal split with CtrlP
+nnoremap hh :split<cr>:CtrlP<cr>
+" New tab split with CtrlP
+nnoremap tt :tabe<cr>:CtrlP<cr>
+
 " Space in normal mode for code folding
 nnoremap <space> za
 
@@ -136,7 +142,7 @@ nnoremap I i
 "inoremap > \|
 
 " Add Bakctick for Markdown
-inoremap '' `
+"inoremap '' `
 " Go To Previus/Next Location of pointer
 " Previus
 nnoremap <C-o> <C-o> 
@@ -150,24 +156,37 @@ inoremap OD <nop>
 inoremap OC <nop>
 inoremap OA <nop>
 
-" New Mapping for Arrow Keys
+" Fast CopyPaste
+"inoremap <C-v> :execute ':set paste | ' 
 
+" New Mapping for Arrow Keys
 nnoremap j h
 nnoremap k j
 nnoremap i k
 nnoremap l l
 
-" Navigation through TABS
+vnoremap j h
+vnoremap k j
+vnoremap i k
+vnoremap l l
 
+" Navigation through TABS
 nnoremap L gt
 nnoremap J gT
 
 " Navigation through PANES
+"nnoremap <C-J> <C-W><C-H> 
+"nnoremap <C-I> <C-W><C-K> 
+"nnoremap <C-K> <C-W><C-J> 
+"nnoremap <C-L> <C-W><C-L> 
 
-nnoremap <C-L> <C-W><C-L> 
-nnoremap <C-J> <C-W><C-H> 
-nnoremap <C-K> <C-W><C-J> 
-nnoremap <C-I> <C-W><C-K> 
+let g:tmux_navigator_save_on_switch = 1
+let g:tmux_navigator_no_mappings = 1
+
+nnoremap <silent> <c-k> :TmuxNavigateDown<cr>  
+nnoremap <silent> <c-i> :TmuxNavigateUp<cr>  
+nnoremap <silent> <c-l> :TmuxNavigateRight<cr>  
+nnoremap <silent> <c-j> :TmuxNavigateLeft<cr>  
 
 " Change . to : in command mode
 nnoremap . :
@@ -176,6 +195,7 @@ nnoremap - .
 
 " Make uppercase
 nnoremap mu <esc>viwUviw<esc>
+inoremap <c-U> <esc>viwUea
 
 " Replace work with yanked one
 nnoremap riw viwp
@@ -186,23 +206,17 @@ onoremap p i(
 " Select all the word 
 onoremap w iw
 onoremap ' i'
-" Select till end of the line
-onoremap e $
 
 " Fast movement through text
-nnoremap œ 10k
-nnoremap º 10j
-nnoremap ª b
-
-nnoremap <Esc>l 10l
-nnoremap <Esc>j 10h
 nnoremap <Esc>i 10k
 nnoremap <Esc>k 10j
 
-nnoremap ¬ e
+"nnoremap E e
+nnoremap B 0 
+nnoremap E $
 
-nnoremap el g$
-nnoremap ej g^
+nnoremap rl g$
+nnoremap rj g^
 
 " Mapping for ><
 
@@ -220,6 +234,9 @@ nnoremap <CR> o<Esc>
 inoremap jk <esc>
 inoremap <esc> <nop>
 
+vnoremap òò <esc>
+vnoremap <esc> <nop>
+
 " }}}
 " Commands {{{
 
@@ -230,10 +247,12 @@ com! FormatJSON %!python -m json.tool
 
 " Set the leader key
 let mapleader = ","
-nnoremap <leader>c :set cursorline!<CR>
 " Simply edit and source this config file
 nnoremap <leader>ev :tabe $MYVIMRC<CR>
 nnoremap <leader>sv :so $MYVIMRC<CR> 
+nnoremap <leader>if gg=G 
+nnoremap <leader>fs :setlocal foldmethod=syntax<CR>
+nnoremap <leader>ep :CtrlP<CR>
 
 " }}}
 " Search {{{
@@ -272,6 +291,16 @@ augroup FileTypes
     autocmd BufNewFile,BufRead *.jade setlocal ft=jade
 augroup END
 
+augroup typescript_fold
+    autocmd!
+    au FileType typescript set foldmethod=syntax
+    au FileType typescript set shiftwidth=2 
+    au FileType typescript set tabstop=2 
+    au BufNewFile,BufRead *.ts set shiftwidth=2 
+    au BufNewFile,BufRead *.ts set foldmethod=syntax
+    au BufRead,BufNewFile *.ts  setfiletype typescript
+augroup END
+
 augroup javascript_fold
     autocmd!
     au FileType javascript set foldmethod=syntax
@@ -287,15 +316,53 @@ augroup END
 
 augroup html_fold
     autocmd!
-    au FileType javascript set foldmethod=syntax
-    au BufEnter,BufRead *.html set foldmethod=indent
+    au BufEnter,BufRead *.html setlocal foldmethod=indent
+    au BufRead,BufWritePre *.html :normal gg=G
 augroup END
 
 augroup filetype_vim
     autocmd!
     autocmd FileType vim setlocal foldmethod=marker
     autocmd FileType vim setlocal foldlevelstart=0
+    au BufEnter,BufRead vim set foldmethod=marker
 augroup END
+
+augroup filetype_php 
+    autocmd!
+    au BufEnter,BufRead *.php setlocal foldmethod=indent
+augroup END
+
+augroup filetype_comment
+    autocmd!
+    autocmd FileType python      nnoremap <buffer> <leader>c I#<esc>
+    autocmd FileType javascript  nnoremap <buffer> <leader>c I//<esc>
+augroup END
+augroup filetype_iabbrev
+  autocmd!
+  autocmd FileType python      :iabbrev <buffer> iff if:<left>
+  autocmd FileType javascript  :iabbrev <buffer> iff if ()
+augroup END
+
+augroup filetype_vue
+  autocmd!
+  autocmd BufRead,BufNewFile *.vue setlocal filetype=vue
+  autocmd BufRead,BufNewFile *.vue setlocal foldmethod=indent
+augroup END
+
+augroup filetype_rust
+  autocmd!
+  autocmd BufRead,BufNewFile *.rs setlocal filetype=rust
+  "autocmd BufRead,BufNewFile *.rs setlocal foldmethod=indent
+augroup END
+
+augroup filetype_toml
+    autocmd!
+    autocmd BufNewFile,BufRead *.toml,Gopkg.lock,Cargo.lock,*/.cargo/config,Pipfile setlocal filetype=toml
+augroup END
+
+
+" Cpp Autocompletion
+au BufNewFile,BufRead,BufEnter *.cpp,*.hpp set omnifunc=omni#cpp#complete#Main
 
 " }}}
 " Vundle Plugins {{{
@@ -308,6 +375,10 @@ Plugin 'gmarik/vundle'
 "let &runtimepath.=',$HOME/.vim/bundle/Vundle.vim'
 call vundle#begin() " let Vundle manage Vundle, required Plugin 'gmarik/Vundle.vim' 
 
+" make vim try to detect file types and load plugins for them
+filetype on
+filetype plugin on
+
 " Plugin's List
 Plugin 'itchyny/lightline.vim'      
 Plugin 'kien/ctrlp.vim'         
@@ -319,8 +390,8 @@ Plugin 'MarcWeber/vim-addon-mw-utils'
 Plugin 'tomtom/tlib_vim'
 Plugin 'garbas/vim-snipmate'
 Plugin 'Raimondi/delimitMate'
-"Plugin 'Valloric/YouCompleteMe'
-Plugin 'helino/vim-json'
+Plugin 'Valloric/YouCompleteMe'
+"Plugin 'helino/vim-json'
 Plugin 'junegunn/vim-easy-align'
 "Plugin 'marijnh/tern_for_vim'
 Plugin 'pangloss/vim-javascript'
@@ -329,6 +400,26 @@ Plugin 'nathanaelkane/vim-indent-guides'
 Plugin 'wesQ3/vim-windowswap'
 Plugin 'scrooloose/syntastic'
 Plugin 'maksimr/vim-jsbeautify'
+Plugin 'rdnetto/YCM-Generator'
+Plugin 'leafgarland/typescript-vim'
+Plugin 'moll/vim-node'
+Plugin 'ekalinin/Dockerfile.vim'
+Plugin 'jwalton512/vim-blade'
+Plugin 'christoomey/vim-tmux-navigator'
+Plugin 'brooth/far.vim'
+Plugin 'posva/vim-vue'
+Plugin 'rust-lang/rust.vim'
+"Plugin 'LucHermitte/lh-vim-lib'
+"Plugin 'LucHermitte/lh-tags'
+"Plugin 'LucHermitte/lh-dev'
+"Plugin 'LucHermitte/lh-brackets'
+"Plugin 'LucHermitte/searchInRuntime'
+"Plugin 'LucHermitte/mu-template'
+"Plugin 'tomtom/stakeholders_vim'
+"Plugin 'LucHermitte/alternate-lite'
+"Plugin 'LucHermitte/lh-cpp'
+Plugin 'tpope/vim-obsession'
+Plugin 'dhruvasagar/vim-prosession'
 
 " end plugin definition
 call vundle#end()            " required for vundle
@@ -367,6 +458,11 @@ set statusline+=%#warningmsg#
 set statusline+=%{SyntasticStatuslineFlag()}
 set statusline+=%*
 
+let g:syntastic_always_populate_loc_list=1
+let g:syntastic_auto_loc_list=1
+let g:syntastic_check_on_open=1
+let g:syntastic_check_on_wq=0
+
 " On by default, turn it off for html
 let g:syntastic_mode_map = { 'mode': 'active',
     \ 'active_filetypes': [],
@@ -375,8 +471,15 @@ let g:syntastic_mode_map = { 'mode': 'active',
 " Syntastic Checker Enables
 let g:syntastic_css_checkers = ['prettycss']
 let g:syntastic_js_checkers = ['jshint']
+let g:syntastic_python_checkers = ['python']
 
 " Better :sign interface symbols
 let g:syntastic_error_symbol = '✗'
 let g:syntastic_warning_symbol = '!'
+
+" YouCompleteMe
+let g:ycm_global_ycm_extra_conf = "~/.vim/.ycm_extra_conf.py"
+
+" Clang Complete
+"let g:clang_library_path='/usr/lib/llvm-3.8/lib'
 " }}}

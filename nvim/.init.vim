@@ -1,8 +1,8 @@
-" ------- VIMRC CONFIGURATION -------
+" ------- NVIMRC CONFIGURATION -------
 " Colors {{{"{{{
 
 " set the color theme to wombat256
-colorscheme wombat
+colorscheme wombat256mod
 " make a mark for column 80
 set colorcolumn=80
 " and set the mark color to DarkSlateGray
@@ -15,10 +15,17 @@ syntax on
 hi CursorLine cterm=NONE ctermbg=234 
 set cursorline
 " set Adobe's Source Code Pro font as default
-set guifont=Source\ Code\ Pro
+"set guifont=Source\ Code\ Pro
 
 " }}}"}}}
 " General {{{
+if has('gui_running')
+    set guifont=Lucida_Console:h11
+endif
+
+if &shell =~# 'fish$'
+    set shell=sh
+endif
 
 " keep the cursor visible within 3 lines when scrolling
 set scrolloff=3
@@ -28,6 +35,9 @@ set wildmenu
 
 " Show matching parentesis
 set showmatch
+
+" Reload changed  files
+set autoread
 
 " remove the .ext~ files, but not the swapfiles
 set nobackup
@@ -46,12 +56,9 @@ let &clipboard = has('unnamedplus') ? 'unnamedplus' : 'unnamed'
 " don't make vim compatible with vi 
 set nocompatible
 set nocp
-" make vim try to detect file types and load plugins for them
-filetype on
-filetype plugin on
+
 filetype indent on
-" reload files changed outside vim
-set autoread         
+
 " encoding is utf 8
 set encoding=utf-8
 set fileencoding=utf-8
@@ -87,6 +94,9 @@ set shiftwidth=4
 " }}}
 " Mappings {{{
 
+" Set foldmethod=syntax
+nnoremap fd :execute ':set foldmethod=syntax'<CR>
+
 " Cancella testo tra due virgole
 nnoremap ci, T,ct,
 
@@ -112,6 +122,13 @@ vmap <S-Tab> <gv
 nnoremap ' `
 nnoremap ` '
 
+" Vertical split with CtrlP
+nnoremap vv <C-w>v<cr>:CtrlP<cr>
+" Horizontal split with CtrlP
+nnoremap hh :split<cr>:CtrlP<cr>
+" New tab split with CtrlP
+nnoremap tt :tabe<cr>:CtrlP<cr>
+
 " Space in normal mode for code folding
 nnoremap <space> za
 
@@ -123,9 +140,16 @@ command! Ef :CtrlP
 nnoremap I i
 
 " Slash e Pipe remapped
-inoremap < \ 
-inoremap > \|
+"inoremap < \ 
+"inoremap > \|
 
+" Add Bakctick for Markdown
+"inoremap '' `
+" Go To Previus/Next Location of pointer
+" Previus
+nnoremap <C-o> <C-o> 
+" Next
+nnoremap <C-p> <C-i> 
 
 " Disable arrow keys during insert mode
 
@@ -134,24 +158,37 @@ inoremap OD <nop>
 inoremap OC <nop>
 inoremap OA <nop>
 
-" New Mapping for Arrow Keys
+" Fast CopyPaste
+"inoremap <C-v> :execute ':set paste | ' 
 
+" New Mapping for Arrow Keys
 nnoremap j h
 nnoremap k j
 nnoremap i k
 nnoremap l l
 
-" Navigation through TABS
+vnoremap j h
+vnoremap k j
+vnoremap i k
+vnoremap l l
 
+" Navigation through TABS
 nnoremap L gt
 nnoremap J gT
 
 " Navigation through PANES
+"nnoremap <C-J> <C-W><C-H> 
+"nnoremap <C-I> <C-W><C-K> 
+"nnoremap <C-K> <C-W><C-J> 
+"nnoremap <C-L> <C-W><C-L> 
 
-nnoremap <C-L> <C-W><C-L> 
-nnoremap <C-J> <C-W><C-H> 
-nnoremap <C-K> <C-W><C-J> 
-nnoremap <C-I> <C-W><C-K> 
+let g:tmux_navigator_save_on_switch = 1
+let g:tmux_navigator_no_mappings = 1
+
+nnoremap <silent> <c-k> :TmuxNavigateDown<cr>  
+nnoremap <silent> <c-i> :TmuxNavigateUp<cr>  
+nnoremap <silent> <c-l> :TmuxNavigateRight<cr>  
+nnoremap <silent> <c-j> :TmuxNavigateLeft<cr>  
 
 " Change . to : in command mode
 nnoremap . :
@@ -160,6 +197,10 @@ nnoremap - .
 
 " Make uppercase
 nnoremap mu <esc>viwUviw<esc>
+inoremap <c-U> <esc>viwUea
+
+" Replace work with yanked one
+nnoremap riw viwp
 
 " New Operators
 " Select inside parenthesis
@@ -167,26 +208,26 @@ onoremap p i(
 " Select all the word 
 onoremap w iw
 onoremap ' i'
-" Select till end of the line
-onoremap e $
 
 " Fast movement through text
-nnoremap œ 10k
-nnoremap º 10j
-nnoremap ª b
+nnoremap <Esc>i 10k
+nnoremap <Esc>k 10j
 
-nnoremap ¬ e
+"nnoremap E e
+nnoremap B 0 
+nnoremap E $
 
-nnoremap el g$
-nnoremap ej g^
+nnoremap rl g$
+nnoremap rj g^
 
 " Mapping for ><
-inoremap \ <
-inoremap \| >
+
+"inoremap \ <
+"inoremap \| >
 
 " Mapping for |\
-inoremap < \
-inoremap > |
+"inoremap < \
+"inoremap > |
 
 " Crea una linea prima o dopo quella attuale senza uscire dal command mode
 nnoremap <S-ENTER> O<Esc>
@@ -195,15 +236,25 @@ nnoremap <CR> o<Esc>
 inoremap jk <esc>
 inoremap <esc> <nop>
 
+vnoremap òò <esc>
+vnoremap <esc> <nop>
+
+" }}}
+" Commands {{{
+
+com! FormatJSON %!python -m json.tool
+
 " }}}
 " Leader Mappings {{{
 
 " Set the leader key
 let mapleader = ","
-nnoremap <leader>c :set cursorline!<CR>
 " Simply edit and source this config file
 nnoremap <leader>ev :tabe $MYVIMRC<CR>
 nnoremap <leader>sv :so $MYVIMRC<CR> 
+nnoremap <leader>if gg=G 
+nnoremap <leader>fs :setlocal foldmethod=syntax<CR>
+nnoremap <leader>ep :CtrlP<CR>
 
 " }}}
 " Search {{{
@@ -242,81 +293,77 @@ augroup FileTypes
     autocmd BufNewFile,BufRead *.jade setlocal ft=jade
 augroup END
 
+augroup typescript_fold
+    autocmd!
+    au FileType typescript set foldmethod=syntax
+    au FileType typescript set shiftwidth=2 
+    au FileType typescript set tabstop=2 
+    au BufNewFile,BufRead *.ts set shiftwidth=2 
+    au BufNewFile,BufRead *.ts set foldmethod=syntax
+    au BufRead,BufNewFile *.ts  setfiletype typescript
+augroup END
+
 augroup javascript_fold
     autocmd!
-    au FileType javascript :execute 'echo "JS file"'
-    au FileType javascript :execute 'filetype indent off'
-    au FileType javascript :execute 'call JavaScriptFold()'
-    au BufNewFile,BufRead *.js :execute 'call JavaScriptFold()' 
+    au FileType javascript set foldmethod=syntax
+    au FileType javascript set shiftwidth=2 
+    au BufNewFile,BufRead *.js set shiftwidth=2 
+    au BufNewFile,BufRead *.js set foldmethod=syntax
 augroup END
 
 augroup css_fold
-        autocmd!
-        au BufEnter,BufRead *.css set foldmethod=marker
+    autocmd!
+    au BufEnter,BufRead *.css set foldmethod=marker
+augroup END
+
+augroup html_fold
+    autocmd!
+    au BufEnter,BufRead *.html setlocal foldmethod=indent
+    au BufRead,BufWritePre *.html :normal gg=G
 augroup END
 
 augroup filetype_vim
     autocmd!
     autocmd FileType vim setlocal foldmethod=marker
     autocmd FileType vim setlocal foldlevelstart=0
+    au BufEnter,BufRead vim set foldmethod=marker
 augroup END
 
-" }}}
-" Vundle Plugins {{{
+augroup filetype_php 
+    autocmd!
+    au BufEnter,BufRead *.php setlocal foldmethod=indent
+augroup END
 
-" initiate Vundle
-let &runtimepath.=',$HOME/.vim/bundle/Vundle.vim'
-call vundle#begin() " let Vundle manage Vundle, required Plugin 'gmarik/Vundle.vim' 
+augroup filetype_comment
+    autocmd!
+    autocmd FileType python      nnoremap <buffer> <leader>c I#<esc>
+    autocmd FileType javascript  nnoremap <buffer> <leader>c I//<esc>
+augroup END
+augroup filetype_iabbrev
+  autocmd!
+  autocmd FileType python      :iabbrev <buffer> iff if:<left>
+  autocmd FileType javascript  :iabbrev <buffer> iff if ()
+augroup END
 
-" Plugin's List
-Plugin 'itchyny/lightline.vim'      
-Plugin 'kien/ctrlp.vim'         
-Plugin 'mattn/emmet-vim'
-"Plugin 'othree/javascript-libraries-syntax.vim'
-"Plugin 'vim-scripts/JavaScript-Indent'
-Plugin 'gcmt/taboo.vim'
-Plugin 'MarcWeber/vim-addon-mw-utils'
-Plugin 'tomtom/tlib_vim'
-Plugin 'garbas/vim-snipmate'
-Plugin 'Raimondi/delimitMate'
-Plugin 'Valloric/YouCompleteMe'
-Plugin 'helino/vim-json'
-Plugin 'junegunn/vim-easy-align'
-Plugin 'marijnh/tern_for_vim'
-Plugin 'pangloss/vim-javascript'
-Plugin 'jelera/vim-javascript-syntax'
-Plugin 'nathanaelkane/vim-indent-guides'
+augroup filetype_vue
+  autocmd!
+  autocmd BufRead,BufNewFile *.vue setlocal filetype=vue
+  autocmd BufRead,BufNewFile *.vue setlocal foldmethod=indent
+augroup END
 
-" end plugin definition
-call vundle#end()            " required for vundle
+augroup filetype_rust
+  autocmd!
+  autocmd BufRead,BufNewFile *.rs setlocal filetype=rust
+  "autocmd BufRead,BufNewFile *.rs setlocal foldmethod=indent
+augroup END
 
-" }}}
-" Plugin Config {{{
+augroup filetype_toml
+    autocmd!
+    autocmd BufNewFile,BufRead *.toml,Gopkg.lock,Cargo.lock,*/.cargo/config,Pipfile setlocal filetype=toml
+augroup END
 
-" EMMET
-let g:user_emmet_leader_key='<C-z>'
 
-" LIGHTLINE
-let g:lightline = {
-    \ 'colorscheme' : 'wombat',
-    \ }
-set laststatus=2
-
-" JAVASCRIPT SYNTAX
-let g:used_javascript_libs='angularjs,angularuirouter,jquery'
-
-" TABOO
-set sessionoptions+=tabpages,globals
-
-" YOU COMPLETE ME 
-" These are the tweaks I apply to YCM's config, you don't need them but they might help.
-" YCM gives you popups and splits by default that some people might not like, so these should tidy it up a bit for you.
-let g:ycm_add_preview_to_completeopt=0
-let g:ycm_confirm_extra_conf=0
-set completeopt-=preview
+" Cpp Autocompletion
+au BufNewFile,BufRead,BufEnter *.cpp,*.hpp set omnifunc=omni#cpp#complete#Main
 
 " }}}
-
-
-
-
