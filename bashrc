@@ -133,6 +133,7 @@ export PYTHONPATH=$PYTHONPATH:/usr/local/lib/python3.5/site-packages
 export ANDROID_HOME=/home/giacomo/android/sdk
 
 alias dc=docker-compose
+alias dcp="docker-compose -f docker-compose.prod.yml"
 alias dl="docker-compose logs -f"
 alias g=git
 alias d=docker

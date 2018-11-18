@@ -9,13 +9,8 @@ endif
 call plug#begin()
 
 Plug 'Shougo/deoplete.nvim', { 'do': ':UpdateRemotePlugins' }
-Plug 'padawan-php/deoplete-padawan', { 'for': 'php', 'do': 'composer install' }
-Plug 'StanAngeloff/php.vim', {'for': 'php'}
-Plug 'autozimu/LanguageClient-neovim', { 'do': ':UpdateRemotePlugins' }
-Plug 'roxma/LanguageServer-php-neovim',  {'do': 'composer install && composer run-script parse-stubs', 'for': 'php'}
 Plug 'neomake/neomake'
-Plug 'SirVer/ultisnips' | Plug 'phux/vim-snippets'
-
+"Plug 'SirVer/ultisnips' | Plug 'phux/vim-snippets'
 Plug 'scrooloose/nerdtree'
 Plug 'vim-airline/vim-airline'
 Plug 'vim-airline/vim-airline-themes'
@@ -30,28 +25,43 @@ Plug 'pangloss/vim-javascript'
 Plug 'tpope/vim-obsession'
 Plug 'ekalinin/Dockerfile.vim'
 
+Plug '2072/PHP-Indenting-for-VIm'    " PHP indent script
+Plug 'Yggdroot/indentLine'           " highlighting 4sp indenting
+Plug 'chrisbra/Colorizer'            " colorize colors
+Plug 'chriskempson/base16-vim'       " high quality colorschemes
+Plug 'mhinz/vim-signify'             " show VCS changes
+Plug 'sheerun/vim-polyglot'          " newer language support
+
+" Code Analysis and Completion
+"Plug 'lvht/phpcd.vim', { 'for': 'php', 'do': 'composer install' }
+Plug 'ternjs/tern_for_vim', { 'do': 'npm install' }
+Plug 'roxma/nvim-yarp'               " deoplete dependency
+Plug 'roxma/vim-hug-neovim-rpc'      " deoplete dependency
+
+" Other Features
+Plug 'mileszs/ack.vim'               " ack/rg support
+Plug 'editorconfig/editorconfig-vim' " editorconfig support
+
 Plug 'sickill/vim-monokai'
 Plug 'iCyMind/NeoSolarized'
 Plug 'flazz/vim-colorschemes'
-"Plug 'roxma/LanguageServer-php-neovim',  {'do': 'composer install && composer run-script parse-stubs'}
+Plug 'chr4/nginx.vim'                " Nginx Syntax Highlighting
 
 call plug#end()
 
 let g:deoplete#enable_at_startup = 1
+let g:deoplete#enable_yarp = 1
 
 let g:deoplete#sources = {}
-let g:deoplete#sources.php = ['padawan', 'ultisnips', 'tags', 'buffer']
 
-" needed for echodoc to work if add_parentheses is 1
-let g:deoplete#sources#padawan#add_parentheses = 1
+let g:deoplete#ignore_sources = get(g:, 'deoplete#ignore_sources', {})
+let g:deoplete#ignore_sources.php = ['omni']
 
 " cycle through menu items with tab/shift+tab
 inoremap <expr> <TAB> pumvisible() ? "\<c-n>" : "\<TAB>"
 inoremap <expr> <s-tab> pumvisible() ? "\<c-p>" : "\<TAB>"
 
-" no need for diagnostics, we're going to use neomake for that
-let g:LanguageClient_diagnosticsEnable  = 0
-let g:LanguageClient_signColumnAlwaysOn = 0
+autocmd InsertLeave,CompleteDone * if pumvisible() == 0 | pclose | endif
 
 " This slows down Nvim a lot 
 let g:vue_disable_pre_processors=1
@@ -109,6 +119,16 @@ set sts=2
 " enable mouse support
 set mouse=a mousemodel=popup
 
+" enable True Colors
+set termguicolors
+let &t_8f = "\<Esc>[38;2;%lu;%lu;%lum"
+let &t_8b = "\<Esc>[48;2;%lu;%lu;%lum"
+
+" Change cursor shape based on mode
+let &t_SI = "\<Esc>[6 q"
+let &t_SR = "\<Esc>[4 q"
+let &t_EI = "\<Esc>[2 q"
+
 
 " Show the choices when inserting commands
 set wildmenu
@@ -164,13 +184,6 @@ au FileType crontab setlocal bkc=yes
 
 set hidden
 
-" Disable completion where available from ALE
-" (not worth creating a separate file just for a one-liner)
-let g:ale_completion_enabled = 0
-
-" Only run linters named in ale_linters settings.
-let g:ale_linters_explicit = 1
-
 " terminal settings
 autocmd BufWinEnter,WinEnter term://* startinsert
 autocmd BufLeave term://* stopinsert
@@ -216,7 +229,6 @@ let g:airline_symbols.linenr = ''
 let g:airline_powerline_fonts = 1
 let g:airline#extensions#bufferline#enabled = 1
 let g:airline#extensions#tagbar#enabled = 1
-let g:airline#extensions#ale#enabled = 1
 
 " split pane navigation
 "nnoremap <C-J> <C-W><C-J>
@@ -231,23 +243,6 @@ let g:airline#extensions#ale#enabled = 1
 " autocmd vimenter * NERDTree " start nerdtree automatically when vim starts up
 map <C-n> :NERDTreeToggle<CR>
 
-" deoplete tab-complete
-inoremap <expr><tab> pumvisible() ? "\<c-n>" : "\<tab>"
-
-" keybindings for language client
-nnoremap <silent> K :call LanguageClient_textDocument_hover()<CR>
-nnoremap <silent> gd :call LanguageClient_textDocument_definition()<CR>
-nnoremap <silent> gr :call LanguageClient_textDocument_references()<CR>
-nnoremap <silent> gs :call LanguageClient_textDocument_documentSymbol()<CR>
-nnoremap <silent> <F2> :call LanguageClient_textDocument_rename()<CR>
-nnoremap <silent> gf :call LanguageClient_textDocument_codeAction()<CR>
-" I only use these 3 mappings
-nnoremap <silent> gd :call LanguageClient_textDocument_definition()<CR>
-nnoremap <silent> gr :call LanguageClient_textDocument_references()<CR>
-nnoremap K :call LanguageClient_textDocument_hover()<cr><Paste>
-
-" ALE
-nmap <F8> <Plug>(ale_fix)
 
 " fzy
 nnoremap <C-p> :Files<CR>
@@ -264,13 +259,11 @@ xmap <C-k>     <Plug>(neosnippet_expand_target)
 " \ pumvisible() ? "\<C-n>" :
 " \ neosnippet#expandable_or_jumpable() ?
 " \    "\<Plug>(neosnippet_expand_or_jump)" : "\<TAB>"
-smap <expr><TAB> neosnippet#expandable_or_jumpable() ?
-\ "\<Plug>(neosnippet_expand_or_jump)" : "\<TAB>"
+"smap <expr><TAB> neosnippet#expandable_or_jumpable() ?
+"\ "\<Plug>(neosnippet_expand_or_jump)" : "\<TAB>"
 
 " Expands or completes the selected snippet/item in the popup menu
-imap <expr><silent><CR> pumvisible() ? deoplete#mappings#close_popup() .
-      \ "\<Plug>(neosnippet_jump_or_expand)" : "\<CR>"
-smap <silent><CR> <Plug>(neosnippet_jump_or_expand)
+imap <expr><silent><CR> pumvisible() ? deoplete#mappings#close_popup() : "\<CR>" 
 
 " For conceal markers.
 if has('conceal')
@@ -457,12 +450,6 @@ augroup END
 " update tags in background whenever you write a php file
 "
 au BufWritePost *.php silent! !eval '[ -f ".git/hooks/ctags" ] && .git/hooks/ctags' & 
-
-" only start lsp when opening php files
-au filetype php LanguageClientStart
-
-" use LSP completion on ctrl-x ctrl-o as fallback for padawan in legacy projects
-"au filetype php set omnifunc=LanguageClient#complete
 
 " markdown file recognition
 autocmd BufNewFile,BufReadPost *.md set filetype=markdown
